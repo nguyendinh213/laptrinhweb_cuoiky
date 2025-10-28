@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Đặt chỗ của tôi</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header th:replace="~{partials/navbar :: navbar}"></header>
+
+<main class="container">
+    <h1>Đặt chỗ của tôi</h1>
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Mã</th>
+                <th>Sân</th>
+                <th>Ngày</th>
+                <th>Bắt đầu</th>
+                <th>Kết thúc</th>
+                <th>Trạng thái</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="b : ${bookings}">
+                <td th:text="${b.paymentCode}">code</td>
+                <td th:text="${b.slot}">1</td>
+                <td th:text="${b.date}">2025-01-01</td>
+                <td th:text="${b.startTime}">17:00</td>
+                <td th:text="${b.endTime}">18:00</td>
+                <td th:text="${b.status}">PENDING</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(bookings)}">
+                <td colspan="6" style="text-align:center; color:var(--muted)">Chưa có đặt chỗ</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+</body>
+</html>
+
+

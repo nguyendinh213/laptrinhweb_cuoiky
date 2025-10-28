@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Chi tiết đặt chỗ</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header th:replace="~{partials/navbar :: navbar}"></header>
+
+<main class="container" style="max-width:720px; margin-top:16px">
+    <h1>Chi tiết đặt chỗ</h1>
+    <p th:if="${error}" class="alert" th:text="${error}"></p>
+    <div th:if="${b}">
+        <div class="table-wrap">
+            <table class="table">
+                <tbody>
+                <tr><th>Mã thanh toán</th><td th:text="${b.paymentCode}">code</td></tr>
+                <tr><th>Trạng thái</th><td th:text="${b.status}">CONFIRMED</td></tr>
+                <tr><th>Sân</th><td th:text="${b.slot}">1</td></tr>
+                <tr><th>Ngày</th><td th:text="${b.date}">2025-01-01</td></tr>
+                <tr><th>Giờ</th><td><span th:text="${b.startTime}">17:00</span> - <span th:text="${b.endTime}">18:00</span></td></tr>
+                <tr><th>Họ tên</th><td th:text="${b.name}">Nguyen Van A</td></tr>
+                <tr><th>SĐT</th><td th:text="${b.phone}">0900000000</td></tr>
+                <tr><th>Tài khoản</th><td th:text="${b.username}">user</td></tr>
+                <tr><th>Số tiền</th><td th:text="${#numbers.formatInteger(b.amount, 3, 'POINT') + ' VND'}">100,000 VND</td></tr>
+                <tr><th>Thanh toán lúc</th><td th:text="${#temporals.format(b.paidAt, 'dd/MM/yyyy HH:mm')}">...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div style="margin-top:12px">
+        <a class="btn" th:href="@{/admin(date=${#dates.format(#dates.createNow(),'yyyy-MM-dd')})}">Quay lại</a>
+    </div>
+    
+</main>
+
+</body>
+</html>
+
+

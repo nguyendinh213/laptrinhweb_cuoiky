@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Công nghệ tích hợp</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- SockJS and STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="display-4 mb-4">
+                    <i class="bi bi-gear-fill"></i> Demo Công nghệ Tích hợp
+                </h1>
+            </div>
+        </div>
+
+        <!-- JWT Authentication Demo -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-shield-lock"></i> JWT Authentication Demo
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Đăng nhập</h6>
+                                <form id="loginForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="loginUsername" value="user">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="loginPassword" value="user123">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                                </form>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Trạng thái</h6>
+                                <div id="authStatus" class="alert alert-info">
+                                    Chưa đăng nhập
+                                </div>
+                                <button id="logoutBtn" class="btn btn-secondary" style="display:none">Đăng xuất</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WebSocket Notifications Demo -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-broadcast"></i> WebSocket Notifications Demo
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button id="connectBtn" class="btn btn-success mb-3">
+                                    <i class="bi bi-wifi"></i> Kết nối WebSocket
+                                </button>
+                                <button id="disconnectBtn" class="btn btn-danger mb-3" style="display:none">
+                                    <i class="bi bi-wifi-off"></i> Ngắt kết nối
+                                </button>
+                                <div class="mb-3">
+                                    <label class="form-label">Gửi thông báo</label>
+                                    <input type="text" class="form-control" id="notificationMessage" placeholder="Nhập thông báo...">
+                                </div>
+                                <button id="sendNotificationBtn" class="btn btn-primary" disabled>
+                                    <i class="bi bi-send"></i> Gửi thông báo
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Thông báo nhận được</h6>
+                                <div id="notifications" class="border p-3" style="height: 200px; overflow-y: auto;">
+                                    <p class="text-muted">Chưa có thông báo nào...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cloudinary Image Upload Demo -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-cloud-upload"></i> Cloudinary Image Upload Demo
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <form id="imageUploadForm" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label class="form-label">Chọn hình ảnh</label>
+                                        <input type="file" class="form-control" id="imageFile" accept="image/*" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Sân số</label>
+                                        <select class="form-control" id="fieldSlot" required>
+                                            <option value="1">Sân 1</option>
+                                            <option value="2">Sân 2</option>
+                                            <option value="3">Sân 3</option>
+                                            <option value="4">Sân 4</option>
+                                            <option value="5">Sân 5</option>
+                                            <option value="6">Sân 6</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Loại hình ảnh</label>
+                                        <select class="form-control" id="imageType" required>
+                                            <option value="FIELD_IMAGE">Hình sân</option>
+                                            <option value="BANNER">Banner</option>
+                                            <option value="PROMOTIONAL">Khuyến mãi</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-info">
+                                        <i class="bi bi-upload"></i> Upload
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Kết quả upload</h6>
+                                <div id="uploadResult" class="alert alert-info">
+                                    Chưa upload hình nào
+                                </div>
+                                <div id="uploadedImages"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bootstrap UI Demo -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-palette"></i> Bootstrap UI Components Demo
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="card border-primary">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="card-title mb-0">Primary Card</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text">Đây là card với màu primary</p>
+                                        <button class="btn btn-primary btn-sm">Button</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="card-title mb-0">Success Card</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text">Đây là card với màu success</p>
+                                        <button class="btn btn-success btn-sm">Button</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-danger">
+                                    <div class="card-header bg-danger text-white">
+                                        <h6 class="card-title mb-0">Danger Card</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text">Đây là card với màu danger</p>
+                                        <button class="btn btn-danger btn-sm">Button</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h6>Bootstrap Icons</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                <i class="bi bi-house-door fs-4 text-primary"></i>
+                                <i class="bi bi-calendar-check fs-4 text-success"></i>
+                                <i class="bi bi-person-circle fs-4 text-info"></i>
+                                <i class="bi bi-gear fs-4 text-warning"></i>
+                                <i class="bi bi-heart fs-4 text-danger"></i>
+                                <i class="bi bi-star fs-4 text-secondary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let stompClient = null;
+        let token = null;
+
+        // JWT Authentication
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                if (data.token) {
+                    token = data.token;
+                    document.getElementById('authStatus').innerHTML = 
+                        `<strong>Đã đăng nhập:</strong> ${data.username} (${data.role})`;
+                    document.getElementById('authStatus').className = 'alert alert-success';
+                    document.getElementById('logoutBtn').style.display = 'block';
+                } else {
+                    document.getElementById('authStatus').innerHTML = 
+                        `<strong>Lỗi:</strong> ${data.message}`;
+                    document.getElementById('authStatus').className = 'alert alert-danger';
+                }
+            } catch (error) {
+                document.getElementById('authStatus').innerHTML = 
+                    `<strong>Lỗi:</strong> ${error.message}`;
+                document.getElementById('authStatus').className = 'alert alert-danger';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            token = null;
+            document.getElementById('authStatus').innerHTML = 'Chưa đăng nhập';
+            document.getElementById('authStatus').className = 'alert alert-info';
+            document.getElementById('logoutBtn').style.display = 'none';
+        });
+
+        // WebSocket
+        document.getElementById('connectBtn').addEventListener('click', () => {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            
+            stompClient.connect({}, (frame) => {
+                console.log('Connected: ' + frame);
+                document.getElementById('connectBtn').style.display = 'none';
+                document.getElementById('disconnectBtn').style.display = 'block';
+                document.getElementById('sendNotificationBtn').disabled = false;
+                
+                // Subscribe to notifications
+                stompClient.subscribe('/topic/admin', (message) => {
+                    const notification = JSON.parse(message.body);
+                    addNotification(notification);
+                });
+            });
+        });
+
+        document.getElementById('disconnectBtn').addEventListener('click', () => {
+            if (stompClient) {
+                stompClient.disconnect();
+                document.getElementById('connectBtn').style.display = 'block';
+                document.getElementById('disconnectBtn').style.display = 'none';
+                document.getElementById('sendNotificationBtn').disabled = true;
+            }
+        });
+
+        document.getElementById('sendNotificationBtn').addEventListener('click', () => {
+            const message = document.getElementById('notificationMessage').value;
+            if (stompClient && message) {
+                stompClient.send("/app/admin/notifications", {}, JSON.stringify({
+                    type: 'DEMO',
+                    message: message,
+                    data: null,
+                    timestamp: new Date().toISOString()
+                }));
+                document.getElementById('notificationMessage').value = '';
+            }
+        });
+
+        function addNotification(notification) {
+            const notificationsDiv = document.getElementById('notifications');
+            const notificationElement = document.createElement('div');
+            notificationElement.className = 'alert alert-info mb-2';
+            notificationElement.innerHTML = `
+                <strong>${notification.type}:</strong> ${notification.message}
+                <small class="d-block text-muted">${new Date(notification.timestamp).toLocaleString()}</small>
+            `;
+            notificationsDiv.appendChild(notificationElement);
+            notificationsDiv.scrollTop = notificationsDiv.scrollHeight;
+        }
+
+        // Image Upload
+        document.getElementById('imageUploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!token) {
+                alert('Vui lòng đăng nhập trước');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', document.getElementById('imageFile').files[0]);
+            formData.append('fieldSlot', document.getElementById('fieldSlot').value);
+            formData.append('imageType', document.getElementById('imageType').value);
+            formData.append('uploadedBy', 'demo-user');
+            
+            try {
+                const response = await fetch('/api/images/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const result = await response.text();
+                document.getElementById('uploadResult').innerHTML = result;
+                document.getElementById('uploadResult').className = 'alert alert-success';
+            } catch (error) {
+                document.getElementById('uploadResult').innerHTML = `Lỗi: ${error.message}`;
+                document.getElementById('uploadResult').className = 'alert alert-danger';
+            }
+        });
+    </script>
+</body>
+</html>

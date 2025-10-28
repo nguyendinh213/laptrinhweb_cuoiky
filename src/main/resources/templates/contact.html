@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Liên hệ</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header th:replace="~{partials/navbar :: navbar}"></header>
+
+<main class="container">
+    <h1>Liên hệ</h1>
+    <div class="contact-info">
+        <p><strong>Địa chỉ sân:</strong> 01 Võ Văn Ngân, Thủ Đức, TP.HCM</p>
+        <p><strong>Hotline đặt sân:</strong> 0901 234 567</p>
+        <p><strong>Email:</strong> booking@utesoccer.example</p>
+        <p><strong>Giờ hỗ trợ:</strong> 08:00 – 22:00</p>
+    </div>
+    <form class="contact-form" method="post" action="#" onsubmit="alert('Cảm ơn bạn đã gửi liên hệ!'); return false;">
+        <label>Họ và tên
+            <input type="text" name="name" required>
+        </label>
+        <label>Email
+            <input type="email" name="email" required>
+        </label>
+        <label>Nội dung
+            <textarea name="message" rows="5" required></textarea>
+        </label>
+        <button type="submit" class="btn-primary">Gửi liên hệ</button>
+    </form>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>© <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span> UTE Soccer.</p>
+    </div>
+    <noscript>Vui lòng bật JavaScript để trải nghiệm tốt nhất.</noscript>
+</footer>
+</body>
+</html>
+
+

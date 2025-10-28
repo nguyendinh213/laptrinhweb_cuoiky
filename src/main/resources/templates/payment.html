@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        .pay-box{ max-width:640px; margin:40px auto; background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:20px }
+        .code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background:#11182710; padding:8px 10px; border-radius:8px }
+        .countdown{ font-weight:700 }
+    </style>
+</head>
+<body>
+<header th:replace="~{partials/navbar :: navbar}"></header>
+
+<main class="container">
+    <div class="pay-box">
+        <h1>Thanh toán đặt chỗ</h1>
+        <p>Mã thanh toán của bạn:</p>
+        <div class="code" th:text="${paymentCode}">PAYCODE</div>
+        <p>Liên kết thanh toán (VNPay sandbox):</p>
+        <p><a class="btn-primary" th:href="${paymentUrl}" target="_blank">Đi tới VNPay</a></p>
+        <p>Hạn thanh toán còn: <span id="timeLeft" class="countdown">--:--</span></p>
+        <p>Nếu quá 3 phút không thanh toán, đơn sẽ bị hủy.</p>
+        <div style="margin-top:12px">
+            <a class="btn" th:href="@{/}">Về trang chủ</a>
+        </div>
+    </div>
+</main>
+
+<script th:inline="javascript">
+    const expiresAt = /*[[${#temporals.format(expiresAt,'yyyy-MM-dd''T''HH:mm:ss')}]]*/ '';
+    const paymentCode = /*[[${paymentCode}]]*/ '';
+
+    function tick(){
+        if(!expiresAt) return;
+        const end = new Date(expiresAt);
+        const now = new Date();
+        let ms = end - now;
+        if (ms <= 0){
+            window.location.href = '/';
+            return;
+        }
+        const sec = Math.floor(ms/1000) % 60;
+        const min = Math.floor(ms/60000);
+        document.getElementById('timeLeft').textContent = `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+    }
+
+    async function poll(){
+        if(!paymentCode) return;
+        try{
+            const res = await fetch(`/api/payment/status?code=${encodeURIComponent(paymentCode)}`);
+            if(!res.ok) return;
+            const data = await res.json();
+            if (data.ok){
+                if (data.status === 'CONFIRMED' || data.status === 'CANCELLED'){
+                    window.location.href = '/';
+                }
+            }
+        }catch(e){ /* ignore */ }
+    }
+
+    tick();
+    setInterval(tick, 1000);
+    setInterval(poll, 3000);
+</script>
+
+</body>
+</html>
+
+

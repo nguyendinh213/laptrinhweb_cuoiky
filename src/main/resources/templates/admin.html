@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Quản trị</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header th:replace="~{partials/navbar :: navbar}"></header>
+
+<main class="container">
+    <h1>Quản trị - Danh sách đặt chỗ</h1>
+
+    <form method="get" th:action="@{/admin}" class="form-grid" style="grid-template-columns:repeat(2,1fr)">
+        <label>Ngày
+            <input type="date" name="date" th:value="${#temporals.format(date, 'yyyy-MM-dd')}">
+        </label>
+        <div style="align-self:end; display:flex; gap:10px; justify-content:flex-end">
+            <button class="btn" type="submit">Lọc</button>
+            <a class="btn-primary" th:href="@{/admin/export(date=${#temporals.format(date, 'yyyy-MM-dd')})}">Tải CSV</a>
+        </div>
+    </form>
+
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Chi tiết</th>
+                <th>Sân</th>
+                <th>Ngày</th>
+                <th>Bắt đầu</th>
+                <th>Kết thúc</th>
+                <th>Họ tên</th>
+                <th>SĐT</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="b : ${bookings}">
+                <td><a class="btn" th:href="@{/admin/booking(id=${b.id})}">Xem</a></td>
+                <td th:text="${b.slot}">1</td>
+                <td th:text="${b.date}">2025-01-01</td>
+                <td th:text="${b.startTime}">17:00</td>
+                <td th:text="${b.endTime}">18:00</td>
+                <td th:text="${b.name}">Nguyen Van A</td>
+                <td th:text="${b.phone}">0900000000</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(bookings)}">
+                <td colspan="7" style="text-align:center; color:var(--muted)">Không có dữ liệu</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>© <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span> UTE Soccer.</p>
+    </div>
+</footer>
+
+</body>
+</html>
+
+

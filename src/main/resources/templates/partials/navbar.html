@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav th:fragment="navbar" class="navbar">
+    <div class="container nav-inner">
+        <a class="brand" th:href="@{/}">UTE Soccer - Đặt sân mini</a>
+        
+        <!-- Navbar for ADMIN: only management + logout -->
+        <ul class="nav-links" sec:authorize="hasRole('ADMIN')">
+            <li><a th:href="@{/admin}">Quản trị</a></li>
+            <li><a th:href="@{/logout}">Đăng xuất</a></li>
+        </ul>
+
+        <!-- Navbar for authenticated USER (not admin) -->
+        <ul class="nav-links" sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
+            <li><a th:href="@{/}">Trang chủ</a></li>
+            <li><a th:href="@{/announcements}">Thông báo</a></li>
+            <li><a th:href="@{/contact}">Liên hệ</a></li>
+            <li>
+                <details>
+                    <summary><span sec:authentication="name"></span></summary>
+                    <div style="position:absolute; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px; margin-top:6px">
+                        <div style="padding:6px 0"><a th:href="@{/me/bookings}">Đặt chỗ của tôi</a></div>
+                        <div style="padding:6px 0"><a th:href="@{/logout}">Đăng xuất</a></div>
+                    </div>
+                </details>
+            </li>
+        </ul>
+
+        <!-- Navbar for anonymous -->
+        <ul class="nav-links" sec:authorize="isAnonymous()">
+            <li><a th:href="@{/}">Trang chủ</a></li>
+            <li><a th:href="@{/announcements}">Thông báo</a></li>
+            <li><a th:href="@{/contact}">Liên hệ</a></li>
+            <li><a th:href="@{/login}">Đăng nhập</a></li>
+            <li><a th:href="@{/register}">Đăng ký</a></li>
+        </ul>
+    </div>
+    
+    <script>
+        (function(){
+            // placeholder for nav behavior
+        })();
+    </script>
+</nav>
+</body>
+</html>
+
+

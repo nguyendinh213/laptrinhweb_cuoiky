@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Đặt sân theo giờ - 6 sân</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="icon" href="data:,">
+    <meta name="color-scheme" content="light dark">
+    
+    <style>
+        @media (prefers-color-scheme: dark) {
+            body { background: #0b0f19; color: #e6e6e6; }
+        }
+    </style>
+    <script th:inline="javascript">
+        const IS_LOGGED_IN = /*[[${loggedIn}]]*/ false;
+    </script>
+    <script>
+        let selectedSlotNumber = null;
+        let selectedTimeIndices = new Set();
+
+        function openModal(slot) {
+            selectedSlotNumber = slot;
+            document.getElementById('selectedSlotLabel').textContent = slot;
+            document.getElementById('slotInput').value = slot;
+            selectedTimeIndices.clear();
+            document.querySelectorAll('.time-chip').forEach(el => el.classList.remove('selected'));
+            
+            // Use Bootstrap modal
+            const modal = new bootstrap.Modal(document.getElementById('bookingModal'));
+            modal.show();
+            
+            // fetch availability for today (or selected date if already chosen)
+            const date = document.getElementById('date').value;
+            if (date) fetchAndMarkAvailability(slot, date);
+        }
+
+        function closeModal() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('bookingModal'));
+            if (modal) modal.hide();
+        }
+
+        function submitBooking(slot) {
+            openModal(slot);
+        }
+
+        function pad2(n){ return n.toString().padStart(2,'0'); }
+
+        function minutesToTimeString(totalMinutes){
+            const h = Math.floor(totalMinutes/60);
+            const m = totalMinutes%60;
+            return `${pad2(h)}:${pad2(m)}`;
+        }
+
+        function setupDateMin() {
+            const dateInput = document.getElementById('date');
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = pad2(today.getMonth()+1);
+            const dd = pad2(today.getDate());
+            dateInput.min = `${yyyy}-${mm}-${dd}`;
+        }
+
+        function buildTimeChips(){
+            const container = document.getElementById('timeChips');
+            container.innerHTML = '';
+            // From 17:00 (5pm) to 24:00 (12pm midnight)
+            const startMinutes = 17*60; // 1020
+            const endMinutes = 24*60;   // 1440
+            let idx = 0;
+            for(let t = startMinutes; t < endMinutes; t += 30){
+                const next = t + 30;
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'btn btn-outline-primary time-chip';
+                chip.dataset.index = String(idx);
+                chip.dataset.start = minutesToTimeString(t);
+                chip.dataset.end = minutesToTimeString(next);
+                chip.textContent = `${chip.dataset.start} - ${chip.dataset.end}`;
+                chip.addEventListener('click', () => toggleChip(chip));
+                container.appendChild(chip);
+                idx++;
+            }
+        }
+
+        async function fetchAndMarkAvailability(slot, date){
+            try{
+                const res = await fetch(`/api/availability?slot=${encodeURIComponent(slot)}&date=${encodeURIComponent(date)}`);
+                if(!res.ok) return;
+                const data = await res.json();
+                if(!data.ok) return;
+                const occupied = new Set(data.occupied);
+                document.querySelectorAll('.time-chip').forEach(chip => {
+                    const i = parseInt(chip.dataset.index,10);
+                    if (occupied.has(i)){
+                        chip.classList.remove('btn-outline-primary', 'btn-primary');
+                        chip.classList.add('btn-danger');
+                        chip.disabled = true;
+                        chip.textContent = '✕ ' + chip.dataset.start + ' - ' + chip.dataset.end;
+                    } else {
+                        chip.classList.remove('btn-danger');
+                        chip.classList.add('btn-outline-primary');
+                        chip.disabled = false;
+                        chip.textContent = chip.dataset.start + ' - ' + chip.dataset.end;
+                    }
+                });
+            }catch(e){ /* ignore */ }
+        }
+
+        function toggleChip(chip){
+            const index = parseInt(chip.dataset.index, 10);
+            if (chip.classList.contains('btn-primary')){
+                chip.classList.remove('btn-primary');
+                chip.classList.add('btn-outline-primary');
+                selectedTimeIndices.delete(index);
+            } else {
+                chip.classList.remove('btn-outline-primary');
+                chip.classList.add('btn-primary');
+                selectedTimeIndices.add(index);
+            }
+        }
+
+        function validateContiguous(indices){
+            if (indices.length < 2) return false;
+            for (let i=1;i<indices.length;i++){
+                if (indices[i] !== indices[i-1] + 1) return false;
+            }
+            return true;
+        }
+
+        function onSubmitBookingForm(e){
+            const nameEl = document.getElementById('name');
+            const phoneEl = document.getElementById('phone');
+            const date = document.getElementById('date') ? document.getElementById('date').value : '';
+            if (!IS_LOGGED_IN){
+                const name = nameEl ? nameEl.value.trim() : '';
+                const phone = phoneEl ? phoneEl.value.trim() : '';
+                if (!name || !phone || !date){
+                    alert('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Ngày.');
+                    e.preventDefault();
+                    return false;
+                }
+            } else {
+                if (!date){
+                    alert('Vui lòng chọn ngày.');
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            // Validate date not in the past
+            const today = new Date(); today.setHours(0,0,0,0);
+            const chosen = new Date(date + 'T00:00:00');
+            if (chosen < today){
+                alert('Ngày không được trong quá khứ.');
+                e.preventDefault();
+                return false;
+            }
+            const sorted = Array.from(selectedTimeIndices).sort((a,b)=>a-b);
+            if (!validateContiguous(sorted)){
+                alert('Vui lòng chọn ít nhất 2 khung liền kề nhau.');
+                e.preventDefault();
+                return false;
+            }
+            const chips = document.querySelectorAll('.time-chip');
+            const firstIdx = sorted[0];
+            const lastIdx = sorted[sorted.length-1];
+            const startTime = chips[firstIdx].dataset.start;
+            const endTime = chips[lastIdx].dataset.end; // end is exclusive of last chip start +30m
+            document.getElementById('startTime').value = startTime;
+            document.getElementById('endTime').value = endTime;
+            // allow submit
+            return true;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setupDateMin();
+            buildTimeChips();
+            document.getElementById('bookingForm').addEventListener('submit', onSubmitBookingForm);
+            document.getElementById('modalClose').addEventListener('click', closeModal);
+            document.getElementById('modalBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='modalBackdrop') closeModal(); });
+            document.getElementById('date').addEventListener('change', () => {
+                if (selectedSlotNumber){
+                    fetchAndMarkAvailability(selectedSlotNumber, document.getElementById('date').value);
+                }
+            });
+        });
+    </script>
+    <script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<header th:replace="~{partials/navbar :: navbar}"></header>
+
+<main>
+    <!-- Hero Section -->
+    <div class="container-fluid bg-primary text-white py-5">
+        <div class="container">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">Đặt sân bóng mini theo giờ</h1>
+                    <p class="lead mb-4">Chọn 1 trong 6 sân để đặt nhanh</p>
+                    <div th:if="${message}" class="alert alert-warning" th:text="${message}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promotional Section for Logged-in Users -->
+    <div th:if="${loggedIn}" class="container py-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card border-success h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0"><i class="bi bi-gift"></i> Khuyến mãi thành viên</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Giảm 10% khung giờ 09:00–16:00 từ T2–T6</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-info h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0"><i class="bi bi-droplet"></i> Tặng nước suối</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Tặng 1 thùng nước 12 chai cho đơn > 3 giờ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Field Cards Section -->
+    <div class="container py-5">
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" th:each="i : ${#numbers.sequence(1,6)}">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-gradient text-white text-center">
+                        <h4 class="card-title mb-0">Sân <span th:text="${i}">1</span></h4>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-tree text-success me-2"></i>
+                                <span>Cỏ nhân tạo</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-people text-primary me-2"></i>
+                                <span>Sân 5v5 tiêu chuẩn</span>
+                            </div>
+                        </div>
+                        <button type="button" th:onclick="|submitBooking(${i})|" 
+                                class="btn btn-primary btn-lg mt-auto">
+                            <i class="bi bi-calendar-check"></i> Đặt sân
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Field Map Banner -->
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <img src="/img/field-map.svg" alt="Sơ đồ vị trí 6 sân và căn tin" 
+                             class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Field Information -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h3 class="card-title mb-0"><i class="bi bi-info-circle"></i> Thông tin sân</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-geo-alt text-primary me-2"></i>
+                                <strong>Địa chỉ:</strong> 01 Võ Văn Ngân, Thủ Đức, TP.HCM
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-clock text-success me-2"></i>
+                                <strong>Giờ mở cửa:</strong> 07:00 – 24:00 hàng ngày
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-star text-warning me-2"></i>
+                                <strong>Tiện ích:</strong> Bãi giữ xe, nhà vệ sinh, nước uống
+                            </li>
+                            <li class="mb-0">
+                                <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                                <strong>Quy định:</strong> Đúng giờ; giày đinh TF/IC; không hút thuốc trong khu sân
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookingModalLabel">
+                        <i class="bi bi-calendar-check"></i> Đặt sân - Sân <span id="selectedSlotLabel">?</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="bookingForm" method="post" th:action="@{/book}">
+                    <div class="modal-body">
+                        <input type="hidden" name="slot" id="slotInput" value="">
+                        <input type="hidden" name="startTime" id="startTime">
+                        <input type="hidden" name="endTime" id="endTime">
+                        
+                        <div th:if="${loggedIn}" class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Đã dùng thông tin tài khoản, bạn chỉ cần chọn ngày và thời gian.
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div th:unless="${loggedIn}" class="col-md-6">
+                                <label for="name" class="form-label">Họ và tên</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div th:unless="${loggedIn}" class="col-md-6">
+                                <label for="phone" class="form-label">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="date" class="form-label">Ngày</label>
+                                <input type="date" class="form-control" id="date" name="date" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h6 class="mb-3">
+                                <i class="bi bi-clock"></i> Chọn khung thời gian (30 phút/khung) - chọn ≥2 và liền kề
+                            </h6>
+                            <div id="timeChips" class="d-flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Hủy
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Xác nhận đặt sân
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>© <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span> UTE Soccer. All rights reserved.</p>
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // progressive enhancement placeholder
+    </script>
+    <noscript>Vui lòng bật JavaScript để trải nghiệm tốt nhất.</noscript>
+</footer>
+
+</body>
+</html>
+
+
