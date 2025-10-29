@@ -21,7 +21,7 @@ public class DbUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AppUser u = userRepository.findByUsername(username);
+        AppUser u = userRepository.findByUsername(username).orElse(null);
         if (u == null) throw new UsernameNotFoundException("User not found");
         GrantedAuthority authority = new SimpleGrantedAuthority(u.getRole());
         return new User(u.getUsername(), u.getPasswordHash(), u.isEnabled(), true, true, true, Collections.singleton(authority));

@@ -1,3 +1,4 @@
+/*
 package com.example.demo.service;
 
 import com.cloudinary.Cloudinary;
@@ -26,7 +27,7 @@ public class CloudinaryService {
             "folder", folder,
             "resource_type", "auto"
         );
-        
+
         Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
         return (String) uploadResult.get("secure_url");
     }
@@ -37,7 +38,7 @@ public class CloudinaryService {
             "public_id", publicId,
             "resource_type", "auto"
         );
-        
+
         Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
         return (String) uploadResult.get("secure_url");
     }
@@ -50,12 +51,12 @@ public class CloudinaryService {
         try {
             String folder = "utesoccer/" + imageType.toLowerCase();
             String publicId = imageType.toLowerCase() + "_" + fieldSlot + "_" + System.currentTimeMillis();
-            
+
             String imageUrl = uploadImage(file, folder, publicId);
-            
+
             FieldImage fieldImage = new FieldImage(fieldSlot, imageUrl, publicId, imageType, uploadedBy);
             return fieldImageRepository.save(fieldImage);
-            
+
         } catch (IOException e) {
             throw new RuntimeException("Lỗi upload hình ảnh: " + e.getMessage());
         }
@@ -86,3 +87,4 @@ public class CloudinaryService {
         }
     }
 }
+*/

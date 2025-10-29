@@ -1,3 +1,4 @@
+/*
 package com.example.demo.config;
 
 import com.cloudinary.Cloudinary;
@@ -29,3 +30,4 @@ public class CloudinaryConfig {
         return new Cloudinary(config);
     }
 }
+*/

@@ -8,7 +8,7 @@
         <!-- Navbar for ADMIN: only management + logout -->
         <ul class="nav-links" sec:authorize="hasRole('ADMIN')">
             <li><a th:href="@{/admin}">Quản trị</a></li>
-            <li><a th:href="@{/logout}">Đăng xuất</a></li>
+            <li><form method="post" th:action="@{/auth/logout}" style="display:inline"><button type="submit" style="background:none;border:none;color:inherit;cursor:pointer">Đăng xuất</button></form></li>
         </ul>
 
         <!-- Navbar for authenticated USER (not admin) -->
@@ -21,7 +21,8 @@
                     <summary><span sec:authentication="name"></span></summary>
                     <div style="position:absolute; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px; margin-top:6px">
                         <div style="padding:6px 0"><a th:href="@{/me/bookings}">Đặt chỗ của tôi</a></div>
-                        <div style="padding:6px 0"><a th:href="@{/logout}">Đăng xuất</a></div>
+                        <div style="padding:6px 0"><a th:href="@{/profile}">Quản lý Profile</a></div>
+                        <div style="padding:6px 0"><form method="post" th:action="@{/auth/logout}" style="display:inline"><button type="submit" style="background:none;border:none;color:inherit;cursor:pointer">Đăng xuất</button></form></div>
                     </div>
                 </details>
             </li>
@@ -32,8 +33,8 @@
             <li><a th:href="@{/}">Trang chủ</a></li>
             <li><a th:href="@{/announcements}">Thông báo</a></li>
             <li><a th:href="@{/contact}">Liên hệ</a></li>
-            <li><a th:href="@{/login}">Đăng nhập</a></li>
-            <li><a th:href="@{/register}">Đăng ký</a></li>
+            <li><a th:href="@{/auth/login}">Đăng nhập</a></li>
+            <li><a th:href="@{/auth/register}">Đăng ký</a></li>
         </ul>
     </div>
     

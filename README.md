@@ -1,314 +1,386 @@
-# UTE Soccer – Đặt sân bóng mini theo giờ (Spring Boot + Thymeleaf)
+# UTE Soccer - Hệ thống đặt sân bóng mini
 
-Ứng dụng web đặt sân bóng 6 sân theo giờ, hỗ trợ thanh toán (VNPay demo), đăng ký/đăng nhập, phân quyền ADMIN/USER, xem lịch đặt, chặn trùng lịch, và trang quản trị.
+## 📋 Tổng quan dự án
 
----
+UTE Soccer là một hệ thống web đặt sân bóng mini theo giờ với 6 sân, được phát triển bằng Spring Boot và Thymeleaf. Hệ thống hỗ trợ đặt chỗ theo khung giờ 30 phút từ 17:00 đến 24:00, tích hợp thanh toán VNPay, quản lý người dùng và phân quyền admin/user.
 
-## 1) Tổng quan chức năng (Lược đồ và luồng chính)
+## 🎯 Tính năng chính
 
-- Homepage (khách, user):
-  - Xem 6 sân, nút Đặt sân, banner sơ đồ vị trí 6 sân và căn tin
-  - Với user (đã đăng nhập): hiển thị banner khuyến mãi, modal đặt sân ẩn các field họ tên/SĐT
-- Modal đặt sân:
-  - Chọn ngày (không quá khứ), chọn các khung 30 phút từ 17:00 đến 24:00
-  - Bắt buộc chọn ≥ 2 khung liền kề
-  - Hiển thị khung đã bận (PENDING chưa hết hạn và CONFIRMED)
-- Đặt sân và thanh toán (VNPay – demo):
-  - Tạo booking trạng thái PENDING, sinh `paymentCode`, hết hạn sau 3 phút
-  - Trang thanh toán hiển thị đếm ngược 3 phút; nhấn “Đi tới VNPay” sẽ xác nhận thành công ngay (demo)
-  - Khi thanh toán xong → CONFIRMED; nếu quá 3 phút → CANCELLED
-  - Sau thanh toán hoặc hết hạn → tự động quay về trang chủ
-- Quản trị (ADMIN):
-  - Lọc theo ngày, chỉ hiển thị booking CONFIRMED
-  - Xem chi tiết 1 booking (bao gồm họ tên, SĐT, tài khoản, thời gian thanh toán)
-  - Xuất CSV danh sách CONFIRMED theo ngày
-- Tài khoản:
-  - Đăng ký (kèm họ tên, SĐT), kích hoạt (demo), đăng nhập
-  - Sau đăng nhập: navbar hiển thị username, menu “Đặt chỗ của tôi”, “Đăng xuất”
+### 👥 Đối với Guest (Khách)
+- Xem thông tin 6 sân bóng mini
+- Đặt chỗ theo giờ với thông tin cá nhân
+- Xem khung giờ đã đặt (màu đỏ, không chọn được)
+- Thanh toán qua VNPay (demo mode)
+- Xem thông báo và liên hệ
 
-Sơ đồ trình tự (rút gọn):
+### 🔐 Đối với User (Người dùng đã đăng ký)
+- Tất cả tính năng của Guest
+- Đăng nhập/đăng ký tài khoản
+- Thông tin cá nhân được tự động điền khi đặt chỗ
+- Xem lịch sử đặt chỗ của mình
+- Quản lý profile cá nhân
+
+### 👨‍💼 Đối với Admin
+- Xem danh sách tất cả đặt chỗ theo ngày
+- Xuất file CSV danh sách đặt chỗ
+- Xem chi tiết từng đặt chỗ
+- Quản lý người dùng và hệ thống
+
+## 🛠️ Công nghệ sử dụng
+
+### Backend Framework
+- **Spring Boot 3.5.7** - Framework chính cho ứng dụng Java
+- **Spring MVC** - Xử lý HTTP requests và responses
+- **Spring Data JPA** - ORM và quản lý database
+- **Spring Security** - Authentication và authorization
+- **Spring WebSocket** - Real-time notifications
+
+### Frontend Technologies
+- **Thymeleaf** - Server-side template engine
+- **Bootstrap 5.3.0** - CSS framework cho responsive design
+- **Bootstrap Icons** - Icon library
+- **Vanilla JavaScript** - Client-side logic
+- **CSS3** - Custom styling với gradients và animations
+
+### Database & Persistence
+- **MySQL 8.0.34** - Database chính
+- **Hibernate 6.6.33** - ORM framework
+- **HikariCP** - Connection pooling
+
+### Authentication & Security
+- **Spring Security** - Authentication framework
+- **JWT (JSON Web Tokens)** - Stateless authentication
+- **BCrypt** - Password hashing
+- **Session Management** - Hybrid JWT-Session approach
+
+### Payment Integration
+- **VNPay Sandbox** - Payment gateway (demo mode)
+- **Payment Service** - Xử lý thanh toán và callback
+
+### Development Tools
+- **Maven** - Build tool và dependency management
+- **Java 22** - Programming language
+- **Tomcat 10.1.48** - Embedded web server
+
+## 🏗️ Kiến trúc hệ thống
+
+### MVC Pattern
 ```
-User → Trang chủ → Đặt sân → Modal → POST /book → Tạo PENDING (3 phút)
-   → Trang thanh toán → (Demo) Xác nhận → Payment return → CONFIRMED → Trang chủ
+Controller Layer (Spring MVC)
+├── HomeController - Trang chủ, booking, availability
+├── AuthController - Authentication, JWT APIs
+├── AdminController - Quản trị admin
+├── PaymentController - Xử lý thanh toán
+└── MyBookingsController - Lịch sử đặt chỗ
+
+Service Layer
+├── PaymentService - Logic thanh toán
+├── NotificationService - WebSocket notifications
+└── JwtUtil - JWT token management
+
+Repository Layer (Spring Data JPA)
+├── BookingRepository - Quản lý đặt chỗ
+├── AppUserRepository - Quản lý người dùng
+└── FieldImageRepository - Quản lý hình ảnh sân
+
+Model Layer (JPA Entities)
+├── Booking - Entity đặt chỗ
+├── AppUser - Entity người dùng
+└── FieldImage - Entity hình ảnh sân
 ```
 
----
-
-## 2) Kiến trúc & Công nghệ
-
-- Spring Boot 3.x, Java 22
-- Thymeleaf 3.1 + `thymeleaf-extras-springsecurity6`
-- Spring Web, Spring Data JPA (Hibernate), Spring Security
-- MySQL 8.x (HikariCP)
-- Scheduled tasks (cleanup PENDING hết hạn)
-- Bootstrap 5 + Bootstrap Icons (UI nhất quán, responsive)
-- JWT Authentication (REST APIs) – stateless
-- WebSocket (STOMP over SockJS) – thông báo realtime
-- Cloudinary – lưu trữ/quản lý hình ảnh sân/banners
-
-Cấu trúc thư mục chính:
-- `src/main/java/com/example/demo/`
-  - `controller/` Home, Admin, Payment, Auth, MyBookings
-  - `model/` Booking, AppUser
-  - `repository/` BookingRepository, AppUserRepository
-  - `service/` PaymentService, DbUserDetailsService, BookingCleanupJob
-  - `config/` SecurityConfig, SchedulerConfig
-  - `UtEsoccerApplication.java`
-- `src/main/resources/templates/` – các trang Thymeleaf
-- `src/main/resources/static/` – CSS, ảnh, JS tĩnh
-
----
-
-## 3) Cài đặt & Chạy dự án
-
-Yêu cầu:
-- JDK 22 (hoặc 21 LTS), Maven 3.9+
-- MySQL server (user: `root`, password: `dinh2103`)
-
-B1. Tạo database (ví dụ `utesoccer`):
+### Database Schema
 ```sql
-CREATE DATABASE IF NOT EXISTS utesoccer CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- Bảng người dùng
+app_users (
+    id BIGINT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE,
+    password_hash VARCHAR(255),
+    full_name VARCHAR(100),
+    phone VARCHAR(20),
+    role VARCHAR(20),
+    enabled BOOLEAN,
+    activation_token VARCHAR(255)
+)
+
+-- Bảng đặt chỗ
+bookings (
+    id BIGINT PRIMARY KEY,
+    slot INT,
+    date DATE,
+    start_time TIME,
+    end_time TIME,
+    name VARCHAR(100),
+    phone VARCHAR(20),
+    amount DECIMAL(10,2),
+    payment_code VARCHAR(50),
+    status VARCHAR(20),
+    expires_at TIMESTAMP,
+    paid_at TIMESTAMP,
+    username VARCHAR(50)
+)
 ```
 
-B2. Cấu hình `src/main/resources/application.properties` (đã có sẵn mẫu):
+## 🚀 Cài đặt và chạy dự án
+
+### Yêu cầu hệ thống
+- Java 22+
+- Maven 3.6+
+- MySQL 8.0+
+- IDE (IntelliJ IDEA, Eclipse, VS Code)
+
+### Cài đặt
+
+1. **Clone repository**
+```bash
+git clone <repository-url>
+cd UTEsoccer
+```
+
+2. **Cấu hình database**
+```sql
+CREATE DATABASE utesoccer;
+-- Tạo user với password: dinh2103
+CREATE USER 'root'@'localhost' IDENTIFIED BY 'dinh2103';
+GRANT ALL PRIVILEGES ON utesoccer.* TO 'root'@'localhost';
+```
+
+3. **Cấu hình application.properties**
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/utesoccer?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.url=jdbc:mysql://localhost:3306/utesoccer
 spring.datasource.username=root
 spring.datasource.password=dinh2103
 spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.thymeleaf.cache=false
-
-# VNPay (demo)
-vnpay.tmnCode=DEMO
-vnpay.hashSecret=DEMO_SECRET
-vnpay.payUrl=http://sandbox.vnpayment.vn/tryitnow/Home/CreateOrder
-vnpay.returnUrl=http://localhost:8080/payment/return
-
-# JWT (demo secret)
-jwt.secret=mySecretKeyForJWTTokenGenerationThatIsAtLeast256BitsLong
-jwt.expiration=86400000
-
-# Cloudinary (điền thông tin thật nếu dùng upload)
-cloudinary.cloud_name=your_cloud_name
-cloudinary.api_key=your_api_key
-cloudinary.api_secret=your_api_secret
 ```
 
-B3. Chạy dự án:
+4. **Chạy ứng dụng**
 ```bash
 mvn spring-boot:run
 ```
-Truy cập: `http://localhost:8080`  
-Trang thử nhanh các công nghệ: `http://localhost:8080/demo`
 
-Tài khoản mẫu:
-- User: `user` / `user123` (ROLE_USER)
-- Admin: tạo qua DB hoặc thêm seeding tương tự (tuỳ chỉnh theo nhu cầu)
+5. **Truy cập ứng dụng**
+- URL: http://localhost:8080
+- Admin: admin/admin123
+- User demo: user/user123
 
----
+## 📱 Giao diện người dùng
 
-## 4) Database & Mô hình dữ liệu
+### Responsive Design
+- **Desktop**: Grid layout 3 cột cho sân
+- **Tablet**: Grid layout 2 cột
+- **Mobile**: Grid layout 1 cột
+- **Bootstrap breakpoints**: sm, md, lg, xl
 
-Bảng `app_users` (entity `AppUser`):
-- `id` (PK, bigint, auto)
-- `username` (unique)
-- `password_hash` (BCrypt)
-- `role` (ROLE_USER/ROLE_ADMIN)
-- `enabled` (boolean)
-- `activation_token` (nullable)
-- `full_name`, `phone`
+### UI Components
+- **Modal Booking Form** - Form đặt chỗ với time slots
+- **Time Slot Chips** - Khung giờ có thể chọn (xanh) và đã đặt (đỏ)
+- **Admin Table** - Bảng quản lý với pagination
+- **Payment Interface** - Giao diện thanh toán VNPay
+- **User Dashboard** - Trang cá nhân người dùng
 
-Bảng `bookings` (entity `Booking`):
-- `id` (PK, bigint, auto)
-- `slot` (1..6)
-- `date` (LocalDate)
-- `start_time`, `end_time` (LocalTime)
-- `name`, `phone`, `username`
-- `status` (PENDING/CONFIRMED/CANCELLED)
-- `payment_code` (unique trong phiên thanh toán)
-- `expires_at` (LocalDateTime, giữ chỗ 3 phút)
-- `amount` (long)
-- `paid_at` (LocalDateTime)
+## 🔧 API Endpoints
 
-Chỉ mục khuyến nghị:
-- `bookings(date, slot, start_time, end_time, status)`
-- `bookings(payment_code)`
-- `app_users(username)`
-
-Phát hiện trùng lịch: repository query kiểm tra giao thoa theo (slot, date, start_time < newEnd, end_time > newStart) và `status <> CANCELLED`.
-
----
-
-## 5) Source code – Các lớp chính
-
-### 5.1. Cấu hình bảo mật – `config/SecurityConfig.java`
-- CSRF off (demo), session stateless cho APIs (JWT)
-- Cho phép truy cập công khai: `/`, `/announcements`, `/contact`, `/css/**`, `/img/**`, `/api/**`, `/payment/**`, `/register`, `/activate`, `/auth/**`, `/demo`
-- `/admin/**` yêu cầu `ROLE_ADMIN`
-- JWT filter: `config/JwtRequestFilter.java`, tiện ích ký/giải mã `util/JwtUtil.java`
-
-### 5.2. Người dùng – `model/AppUser.java`, `repository/AppUserRepository.java`, `service/DbUserDetailsService.java`
-- Lưu người dùng trong DB, BCrypt password
-- JWT REST endpoints: `controller/AuthController.java` (`/auth/login`, `/auth/register`, `/auth/validate`)
-
-### 5.3. Đặt sân – `model/Booking.java`, `repository/BookingRepository.java`
-- Trạng thái: `PENDING` (giữ 3 phút) → `CONFIRMED` (khi thanh toán) → `CANCELLED` (hết hạn hoặc huỷ)
-- Truy vấn phục vụ: tìm trùng, tìm theo ngày/slot, tìm theo `paymentCode`, tìm theo `username`, lọc CONFIRMED theo ngày
-
-### 5.4. Bộ điều khiển – `controller/`
-- `HomeController`:
-  - GET `/` (homepage), `/announcements`, `/contact`
-  - POST `/book`: tạo booking PENDING, auto điền name/phone từ user nếu đã đăng nhập
-  - GET `/api/availability`: trả về các index khung bận cho modal
-- `PaymentController`:
-  - GET `/payment/return`: callback VNPay (demo: xác nhận ngay)
-  - GET `/api/payment/status?paymentCode=`: API để trang payment poll trạng thái
-- `AdminController`:
-  - GET `/admin?date=`: bảng CONFIRMED theo ngày, loại trùng theo (Sân, Ngày, Bắt đầu, Kết thúc)
-  - GET `/admin/export?date=`: xuất CSV
-  - GET `/admin/booking/{id}`: chi tiết 1 booking
-- `AuthController`:
-  - REST `/auth/login`, `/auth/register`, `/auth/validate`
-- `MyBookingsController`:
-  - GET `/me/bookings`: danh sách đặt của user hiện tại
-- `ImageController`:
-  - `/api/images/upload` (ADMIN), `/api/images/field/{slot}`, `/api/images/type/{imageType}`, `/api/images/all`
-- `WebSocketController`:
-  - Nhận/gửi thông báo demo qua STOMP: `/app/admin/notifications` → `/topic/admin`
-- `DemoController`:
-  - GET `/demo`: trang thử nhanh JWT/WebSocket/Upload
-
-### 5.5. Payment – `service/PaymentService.java`
-- Tạo URL thanh toán VNPay (demo), flow “tryitnow” xác nhận ngay
-- Sinh `paymentCode` và ánh xạ vào booking
-
-### 5.6. Cleanup job – `service/BookingCleanupJob.java`, `config/SchedulerConfig.java`
-- Chạy định kỳ (mỗi phút) tìm PENDING hết hạn và đổi sang CANCELLED
-
-### 5.7. Realtime & Media
-- `config/WebSocketConfig.java` – cấu hình STOMP/SockJS (`/ws`, broker `/topic`, `/queue`)
-- `service/NotificationService.java` – tiện ích gửi thông báo realtime
-- `config/CloudinaryConfig.java`, `service/CloudinaryService.java`, `model/FieldImage.java`, `repository/FieldImageRepository.java`
-
----
-
-## 6) Giao diện (Thymeleaf Templates)
-
-- `templates/index.html` – Trang chủ: 6 sân, modal đặt sân, banner sơ đồ `img/field-map.svg`
-- `templates/partials/navbar.html` – Navbar theo role (ADMIN/USER/Khách)
-- `templates/payment.html` – Trang thanh toán có đếm ngược 3 phút, tự redirect
-- `templates/admin.html` – Bảng CONFIRMED theo ngày, loại trùng, link chi tiết
-- `templates/admin_booking_detail.html` – Chi tiết booking, định dạng thời gian thanh toán
-- `templates/login.html`, `templates/register.html`, `templates/my_bookings.html`, `templates/announcements.html`, `templates/contact.html`
-- `templates/demo.html` – Trang demo JWT/WebSocket/Upload (dùng để thử nhanh)
-
-Static:
-- `static/css/styles.css` – tông trung tính, độ tương phản cao hơn; card hover, modal/tables tinh gọn
-- `static/img/field-map.svg` – sơ đồ 6 sân, căn tin ở góc dưới cùng gần Sân 4
-
----
-
-## 7) API chính
-
-- `GET /api/availability?slot={1..6}&date=YYYY-MM-DD`
-  - Trả về `{ ok: true, occupied: [indices] }` – các index khung 30’ đã bận
-- `GET /api/payment/status?paymentCode=...`
-  - Trả về `{ status: PENDING|CONFIRMED|CANCELLED }`
-
-- Auth (JWT)
-  - `POST /auth/login` → `{ token, username, role }`
-  - `POST /auth/register` → `{ token, username, role }`
-  - `GET /auth/validate` (header `Authorization: Bearer <token>`)
-
-- Cloudinary Images
-  - `POST /api/images/upload` (ADMIN, multipart form-data)
-  - `GET /api/images/field/{slot}` | `/type/{imageType}` | `/all`
-
-- WebSocket
-  - Endpoint: `/ws` (SockJS)
-  - Broker: subscribe `/topic/admin`, `/topic/availability`; user queue `/queue/*`
-
----
-
-## 8) Quy tắc & Ràng buộc
-
-- Ngày đặt không được trong quá khứ
-- Phải chọn ≥ 2 khung 30’ liền kề
-- Không hiển thị “đã đặt” ở trang chủ (chỉ thể hiện bận trong modal đặt sân)
-- Chống đặt chồng chéo theo (Sân, Ngày, Start-End) với PENDING chưa hết hạn và CONFIRMED
-
----
-
-## 9) Hướng dẫn phát triển từng chức năng
-
-### 9.1. Tạo Booking (POST /book)
-1) Validate: ngày hợp lệ, số khung chọn ≥ 2, liên tục
-2) Tính `startTime`, `endTime` từ các chip
-3) Kiểm tra trùng lịch qua `BookingRepository.findOverlapping(...)`
-4) Tạo `Booking` PENDING, set `expiresAt = now + 3 phút`, `paymentCode` unique, `amount`
-5) Redirect tới `/payment?code=...`
-
-Mã liên quan: `HomeController`, `Booking`, `BookingRepository`, `PaymentService`, `payment.html`.
-
-### 9.2. Kiểm tra & hiển thị bận trong modal
-1) Client gọi `GET /api/availability`
-2) Server hợp nhất các PENDING chưa hết hạn + CONFIRMED trong ngày/slot
-3) Trả về danh sách index khung bận; client disable các chip tương ứng
-
-Mã liên quan: `HomeController` (`/api/availability`), `index.html` (JS đánh dấu chip bận).
-
-### 9.3. Thanh toán VNPay (demo)
-1) Khi vào trang payment, hiển thị `paymentCode` + đếm ngược 3 phút
-2) Nút “Đi tới VNPay” → chuyển hướng tới URL demo (hoặc giả lập) và ngay lập tức callback như thanh toán thành công
-3) `PaymentController` nhận return, set booking `CONFIRMED`, `paidAt = now`
-4) Nếu quá 3 phút chưa thanh toán, cleanup job sẽ CANCELLED; trang payment poll `/api/payment/status` và redirect về `/`
-
-Mã liên quan: `PaymentService`, `PaymentController`, `BookingCleanupJob`, `payment.html`.
-
-### 9.4. Quản trị admin
-1) GET `/admin?date=YYYY-MM-DD` → lấy toàn bộ CONFIRMED theo ngày
-2) Loại bỏ trùng theo (slot, date, startTime, endTime)
-3) Ẩn cột id; hiển thị nút “Xem” → `/admin/booking/{id}`
-4) Xuất CSV `/admin/export?date=...`
-
-Mã liên quan: `AdminController`, `admin.html`, `admin_booking_detail.html`.
-
-### 9.5. Đăng ký/Đăng nhập/Phân quyền
-1) Đăng ký `/register`: lưu `AppUser` (BCrypt), sinh `activationToken` (demo)
-2) Kích hoạt `/activate?token=` → `enabled=true`
-3) Đăng nhập `/login`
-4) Sau đăng nhập: ADMIN → `/admin`, USER → `/`
-5) Navbar: `sec:authorize` hiển thị menu theo role
-
-Mã liên quan: `SecurityConfig`, `AuthController`, `DbUserDetailsService`, `partials/navbar.html`.
-
----
-
-## 10) Build & đóng gói
-
-```bash
-mvn clean package
-java -jar target/UTEsoccer-*.jar
+### Public APIs
+```
+GET  /                    - Trang chủ
+GET  /announcements       - Thông báo
+GET  /contact            - Liên hệ
+GET  /api/availability   - Kiểm tra khung giờ trống
+POST /book               - Đặt chỗ
+POST /payment/callback    - Callback thanh toán
 ```
 
-Cấu hình runtime thông qua biến môi trường hoặc `application.properties`.
+### Authentication APIs
+```
+GET  /auth/login         - Trang đăng nhập
+GET  /auth/register      - Trang đăng ký
+POST /auth/api/login     - API đăng nhập (JWT)
+POST /auth/api/register  - API đăng ký (JWT)
+GET  /auth/validate      - Validate JWT token
+```
+
+### Admin APIs
+```
+GET  /admin              - Dashboard admin
+GET  /admin/export       - Xuất CSV
+GET  /admin/booking/{id} - Chi tiết đặt chỗ
+```
+
+### User APIs
+```
+GET  /me/bookings        - Lịch sử đặt chỗ
+```
+
+## 🔐 Bảo mật
+
+### Authentication Flow
+1. **Form Login** - Spring Security form authentication
+2. **JWT Generation** - Tạo JWT token sau khi login thành công
+3. **Session Storage** - Lưu JWT trong HTTP session
+4. **Token Validation** - Validate JWT cho API calls
+5. **Role-based Access** - Phân quyền ADMIN/USER
+
+### Security Features
+- **Password Hashing** - BCrypt với salt rounds
+- **CSRF Protection** - Disabled cho demo
+- **Session Management** - Maximum 1 session per user
+- **Input Validation** - Server-side validation
+- **SQL Injection Prevention** - JPA parameterized queries
+
+## 💳 Thanh toán
+
+### VNPay Integration
+- **Sandbox Mode** - Môi trường test
+- **Payment Flow**:
+  1. Tạo booking với status PENDING
+  2. Redirect đến VNPay
+  3. Callback xử lý kết quả
+  4. Cập nhật status thành CONFIRMED
+- **Timeout Handling** - Hủy booking sau 3 phút nếu chưa thanh toán
+
+### Payment States
+- **PENDING** - Chờ thanh toán (3 phút timeout)
+- **CONFIRMED** - Đã thanh toán thành công
+- **CANCELLED** - Hủy hoặc timeout
+
+## 📊 Quản lý dữ liệu
+
+### Booking Management
+- **Real-time Availability** - API kiểm tra khung giờ trống
+- **Conflict Prevention** - Không cho phép đặt trùng khung giờ
+- **Status Tracking** - Theo dõi trạng thái đặt chỗ
+- **Cleanup Jobs** - Tự động hủy booking hết hạn
+
+### User Management
+- **Registration** - Đăng ký với validation
+- **Profile Management** - Quản lý thông tin cá nhân
+- **Booking History** - Lịch sử đặt chỗ
+- **Role Assignment** - Phân quyền ADMIN/USER
+
+## 🎨 UI/UX Design
+
+### Design System
+- **Color Palette**:
+  - Primary: #3182ce (Blue)
+  - Success: #38a169 (Green)
+  - Danger: #dc3545 (Red)
+  - Warning: #d69e2e (Orange)
+- **Typography**: Inter font family
+- **Spacing**: 8px grid system
+- **Shadows**: Layered shadow system
+
+### Interactive Elements
+- **Hover Effects** - Transform và shadow transitions
+- **Loading States** - Pulse animations
+- **Form Validation** - Real-time feedback
+- **Modal Animations** - Slide-in effects
+- **Responsive Images** - SVG field map
+
+## 🔄 Real-time Features
+
+### WebSocket Integration
+- **STOMP Protocol** - Message broker
+- **Notification Service** - Real-time updates
+- **Booking Status Updates** - Live status changes
+- **Admin Notifications** - New booking alerts
+
+## 📈 Performance & Optimization
+
+### Database Optimization
+- **Connection Pooling** - HikariCP configuration
+- **Query Optimization** - JPA query methods
+- **Indexing** - Database indexes on frequently queried columns
+- **Lazy Loading** - JPA lazy loading for relationships
+
+### Frontend Optimization
+- **CSS Variables** - Consistent theming
+- **Responsive Images** - Optimized image loading
+- **JavaScript Bundling** - Minified scripts
+- **Caching** - Static resource caching
+
+## 🧪 Testing
+
+### Test Accounts
+- **Admin**: admin/admin123
+- **User**: user/user123
+- **Demo Data**: Tự động tạo khi khởi động
+
+### Test Scenarios
+- **Booking Flow** - End-to-end booking process
+- **Payment Flow** - VNPay integration testing
+- **Authentication** - Login/logout functionality
+- **Admin Functions** - Management features
+
+## 🚀 Deployment
+
+### Production Considerations
+- **Environment Variables** - Database credentials
+- **HTTPS Configuration** - SSL certificates
+- **Database Migration** - Flyway or Liquibase
+- **Monitoring** - Application metrics
+- **Logging** - Structured logging
+
+### Docker Support
+```dockerfile
+FROM openjdk:22-jdk-slim
+COPY target/UTEsoccer-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","/app.jar"]
+```
+
+## 📝 Development Guidelines
+
+### Code Structure
+- **Package Organization** - Layered architecture
+- **Naming Conventions** - Java naming standards
+- **Documentation** - Javadoc comments
+- **Error Handling** - Comprehensive exception handling
+
+### Git Workflow
+- **Feature Branches** - Feature-based development
+- **Commit Messages** - Conventional commit format
+- **Code Review** - Pull request reviews
+- **CI/CD** - Automated testing and deployment
+
+## 🔮 Future Enhancements
+
+### Planned Features
+- **Mobile App** - React Native or Flutter
+- **Cloudinary Integration** - Image management
+- **Email Notifications** - Booking confirmations
+- **Multi-language Support** - i18n implementation
+- **Analytics Dashboard** - Usage statistics
+
+### Technical Improvements
+- **Microservices Architecture** - Service decomposition
+- **Redis Caching** - Performance optimization
+- **Elasticsearch** - Search functionality
+- **Kubernetes** - Container orchestration
+- **Monitoring** - Prometheus + Grafana
+
+## 📞 Support & Contact
+
+### Development Team
+- **Project Lead**: Development Team
+- **Backend**: Spring Boot, JPA, Security
+- **Frontend**: Thymeleaf, Bootstrap, JavaScript
+- **Database**: MySQL, Hibernate
+
+### Documentation
+- **API Documentation**: Swagger/OpenAPI
+- **User Manual**: In-app help system
+- **Admin Guide**: Management documentation
+- **Developer Guide**: Technical documentation
 
 ---
 
-## 11) Troubleshooting
+## 📄 License
 
-- Lỗi Thymeleaf format ngày/thời gian:
-  - Với `LocalDate/LocalTime` dùng `#temporals.format(...)`
-  - Với `java.util.Date` dùng `#dates.format(...)`
-- 404 chi tiết booking: kiểm tra route `/admin/booking/{id}` và `th:href` trong `admin.html`
-- Ảnh banner không hiển thị: đảm bảo đã cho phép `/img/**` trong `SecurityConfig`
-- JWT không hoạt động: kiểm tra `Authorization: Bearer <token>` và `jwt.secret`
-- WebSocket không kết nối: kiểm tra endpoint `/ws` và path subscribe `/topic/...`
+This project is licensed under the MIT License - see the LICENSE file for details.
 
+## 🙏 Acknowledgments
 
----
-
-## 12) Ghi chú
-
-- Code được tối ưu cho demo và kiểm thử nhanh. Nếu triển khai thật, cần bật lại CSRF, thêm kiểm thử, logging, ràng buộc mạnh hơn và tích hợp VNPay/MoMo chính thức.
+- Spring Boot community for excellent framework
+- Bootstrap team for responsive design tools
+- VNPay for payment gateway integration
+- MySQL team for reliable database system

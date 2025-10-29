@@ -10,21 +10,21 @@
 <header th:replace="~{partials/navbar :: navbar}"></header>
 
 <main class="container" style="max-width:520px; margin-top:24px">
-    <h1>Đăng ký</h1>
-    <p th:if="${error}" style="color:#dc2626" th:text="${error}"></p>
-    <p th:if="${message}" style="color:#16a34a" th:text="${message}"></p>
-    <form method="post" th:action="@{/register}" class="contact-form">
-        <label>Tên đăng nhập
-            <input type="text" name="username" required>
+    <h1 style="color:var(--text-primary); text-align:center; margin-bottom:24px">Đăng ký</h1>
+    <p th:if="${error}" style="color:#dc2626; font-weight:600" th:text="${error}"></p>
+    <p th:if="${message}" style="color:#16a34a; font-weight:600" th:text="${message}"></p>
+    <form method="post" th:action="@{/auth/register}" class="contact-form">
+        <label style="color:var(--text-primary)">Tên đăng nhập
+            <input type="text" name="username" required style="color:var(--text-primary)">
         </label>
-        <label>Mật khẩu
-            <input type="password" name="password" required>
+        <label style="color:var(--text-primary)">Mật khẩu
+            <input type="password" name="password" required style="color:var(--text-primary)">
         </label>
-        <label>Họ và tên
-            <input type="text" name="fullName" required>
+        <label style="color:var(--text-primary)">Họ và tên
+            <input type="text" name="fullName" required style="color:var(--text-primary)">
         </label>
-        <label>Số điện thoại
-            <input type="tel" name="phone" required>
+        <label style="color:var(--text-primary)">Số điện thoại
+            <input type="tel" name="phone" required style="color:var(--text-primary)">
         </label>
         <button type="submit" class="btn-primary">Đăng ký</button>
     </form>

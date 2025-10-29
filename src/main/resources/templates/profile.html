@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Quản lý Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="partials/navbar :: navbar"></div>
+
+    <main class="container" style="max-width:720px; margin-top:24px">
+        <h1 style="color:var(--text-primary); text-align:center; margin-bottom:24px" th:text="${title}">Quản lý Profile</h1>
+        
+        <div th:if="${success}" class="alert alert-success" style="color:var(--text-primary); background:rgba(34, 197, 94, 0.1); border:1px solid rgba(34, 197, 94, 0.3); border-radius:12px; padding:16px; margin-bottom:24px" th:text="${success}"></div>
+        
+        <div class="profile-card" style="background:rgba(255,255,255,.95); backdrop-filter:blur(20px); border-radius:20px; padding:32px; margin:24px 0; box-shadow:0 20px 40px rgba(0,0,0,.15)">
+            <form method="post" th:action="@{/profile/update}" class="contact-form">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label style="color:var(--text-primary); font-weight:600">Tên đăng nhập</label>
+                        <input type="text" th:value="${user.username}" readonly style="color:var(--text-secondary); background:rgba(0,0,0,0.05); border:1px solid rgba(0,0,0,0.1); border-radius:8px; padding:12px; width:100%; margin-bottom:16px">
+                    </div>
+                    <div class="col-md-6">
+                        <label style="color:var(--text-primary); font-weight:600">Vai trò</label>
+                        <input type="text" th:value="${user.role}" readonly style="color:var(--text-secondary); background:rgba(0,0,0,0.05); border:1px solid rgba(0,0,0,0.1); border-radius:8px; padding:12px; width:100%; margin-bottom:16px">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <label style="color:var(--text-primary); font-weight:600">
+                            Họ và tên
+                            <span th:if="${!canChangeName}" style="color:#dc2626; font-size:12px">(Chỉ được thay đổi 1 lần/tuần)</span>
+                        </label>
+                        <input type="text" name="fullName" th:value="${user.fullName}" 
+                               th:disabled="${!canChangeName}"
+                               style="color:var(--text-primary); border:1px solid var(--input-border); border-radius:8px; padding:12px; width:100%; margin-bottom:16px"
+                               th:style="${!canChangeName} ? 'color:var(--text-secondary); background:rgba(0,0,0,0.05); border:1px solid rgba(0,0,0,0.1); border-radius:8px; padding:12px; width:100%; margin-bottom:16px' : 'color:var(--text-primary); border:1px solid var(--input-border); border-radius:8px; padding:12px; width:100%; margin-bottom:16px'">
+                        <div th:if="${!canChangeName}" style="color:#dc2626; font-size:12px; margin-top:-12px; margin-bottom:16px">
+                            <i class="bi bi-info-circle"></i> 
+                            Bạn đã thay đổi tên trong tuần này. Có thể thay đổi lại sau 
+                            <span th:text="${#temporals.format(user.lastNameChange.plusWeeks(1), 'dd/MM/yyyy HH:mm')}">...</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label style="color:var(--text-primary); font-weight:600">Số điện thoại</label>
+                        <input type="tel" name="phone" th:value="${user.phone}" required 
+                               style="color:var(--text-primary); border:1px solid var(--input-border); border-radius:8px; padding:12px; width:100%; margin-bottom:16px">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <label style="color:var(--text-primary); font-weight:600">ID tài khoản</label>
+                        <input type="text" th:value="${user.id}" readonly 
+                               style="color:var(--text-secondary); background:rgba(0,0,0,0.05); border:1px solid rgba(0,0,0,0.1); border-radius:8px; padding:12px; width:100%; margin-bottom:16px">
+                    </div>
+                    <div class="col-md-6">
+                        <label style="color:var(--text-primary); font-weight:600">Lần cuối thay đổi tên</label>
+                        <input type="text" th:value="${user.lastNameChange != null ? #temporals.format(user.lastNameChange, 'dd/MM/yyyy HH:mm') : 'Chưa thay đổi'}" readonly 
+                               style="color:var(--text-secondary); background:rgba(0,0,0,0.05); border:1px solid rgba(0,0,0,0.1); border-radius:8px; padding:12px; width:100%; margin-bottom:16px">
+                    </div>
+                </div>
+                
+                <div style="text-align:center; margin-top:24px">
+                    <button type="submit" class="btn-primary" style="margin-right:12px">
+                        <i class="bi bi-check-circle"></i> Cập nhật Profile
+                    </button>
+                    <a th:href="@{/}" class="btn" style="background:rgba(0,0,0,0.1); color:var(--text-primary); border:1px solid rgba(0,0,0,0.2); border-radius:8px; padding:12px 24px; text-decoration:none">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="info-card" style="background:rgba(59, 130, 246, 0.1); border:1px solid rgba(59, 130, 246, 0.3); border-radius:12px; padding:20px; margin-top:24px">
+            <h5 style="color:var(--text-primary); margin-bottom:12px">
+                <i class="bi bi-info-circle"></i> Thông tin Profile
+            </h5>
+            <ul style="color:var(--text-primary); margin:0; padding-left:20px">
+                <li>Tên đăng nhập không thể thay đổi</li>
+                <li>Họ và tên chỉ được thay đổi 1 lần trong 1 tuần</li>
+                <li>Số điện thoại có thể thay đổi bất kỳ lúc nào</li>
+                <li>Thông tin này sẽ được sử dụng khi đặt sân</li>
+            </ul>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -34,9 +34,17 @@ public class HomeController {
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("title", "Đặt chỗ theo giờ - 6 chỗ");
+        
+        // Check if user is logged in via Spring Security
         org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
         boolean loggedIn = auth != null && auth.isAuthenticated() && !(auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
+        
         model.addAttribute("loggedIn", loggedIn);
+        if (loggedIn) {
+            model.addAttribute("username", auth.getName());
+            model.addAttribute("role", auth.getAuthorities().iterator().next().getAuthority());
+        }
+        
         return "index";
     }
 
@@ -98,12 +106,13 @@ public class HomeController {
     ) {
         model.addAttribute("title", "Đặt chỗ theo giờ - 6 chỗ");
 
-        org.springframework.security.core.Authentication authC = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        boolean isLoggedIn = authC != null && authC.isAuthenticated() && !(authC instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
+        // Check if user is logged in via Spring Security
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isLoggedIn = auth != null && auth.isAuthenticated() && !(auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
 
         // Fill name/phone from profile if missing and logged in
         if (isLoggedIn && (name == null || name.isBlank() || phone == null || phone.isBlank())) {
-            AppUser user = appUserRepository.findByUsername(authC.getName());
+            AppUser user = appUserRepository.findByUsername(auth.getName()).orElse(null);
             if (user != null) {
                 if (name == null || name.isBlank()) name = user.getFullName();
                 if (phone == null || phone.isBlank()) phone = user.getPhone();
@@ -172,7 +181,7 @@ public class HomeController {
         b.setPhone(phone);
         // attach username if logged in
         if (isLoggedIn){
-            b.setUsername(authC.getName());
+            b.setUsername(auth.getName());
         }
         b.setStatus(Booking.Status.PENDING);
         b.setAmount(100000L); // ví dụ: 100,000 VND, có thể tính theo thời lượng

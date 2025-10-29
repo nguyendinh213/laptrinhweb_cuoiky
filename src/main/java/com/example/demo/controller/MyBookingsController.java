@@ -17,12 +17,14 @@ public class MyBookingsController {
 
     @GetMapping("/me/bookings")
     public String myBookings(Model model){
+        // Check if user is logged in via Spring Security
         org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken){
-            return "redirect:/login";
+        
+        if (auth == null || !auth.isAuthenticated() || auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+            return "redirect:/auth/login";
         }
-        String username = auth.getName();
-        List<Booking> list = bookingRepository.findByUsernameOrderByDateDescStartTimeDesc(username);
+        
+        List<Booking> list = bookingRepository.findByUsernameOrderByDateDescStartTimeDesc(auth.getName());
         model.addAttribute("title", "Đặt chỗ của tôi");
         model.addAttribute("bookings", list);
         return "my_bookings";

@@ -24,6 +24,68 @@
         @media (prefers-color-scheme: dark) {
             body { background: #0b0f19; color: #e6e6e6; }
         }
+        
+        /* Ensure text readability */
+        .card-body, .modal-body {
+            color: var(--text-primary) !important;
+        }
+        
+        .form-label {
+            color: var(--text-primary) !important;
+            font-weight: 600;
+        }
+        
+        .form-control {
+            color: var(--text-primary) !important;
+            background-color: var(--input-bg) !important;
+            border-color: var(--input-border) !important;
+        }
+        
+        .form-control:focus {
+            border-color: var(--input-focus) !important;
+            box-shadow: 0 0 0 0.2rem rgba(49, 130, 206, 0.25) !important;
+        }
+        
+        .alert-info {
+            color: var(--text-primary) !important;
+            background-color: rgba(49, 130, 206, 0.1) !important;
+            border-color: var(--input-focus) !important;
+        }
+        
+        .btn-outline-primary {
+            color: var(--text-primary) !important;
+            border-color: var(--input-border) !important;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: rgba(49, 130, 206, 0.1) !important;
+            border-color: var(--input-focus) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary) !important;
+            border-color: var(--primary) !important;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary) !important;
+            border-color: var(--primary) !important;
+            filter: brightness(1.1);
+        }
+        
+        .btn-danger {
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+        }
+        
+        .card-title {
+            color: var(--text-primary) !important;
+        }
+        
+        .list-unstyled li {
+            color: var(--text-primary) !important;
+        }
     </style>
     <script th:inline="javascript">
         const IS_LOGGED_IN = /*[[${loggedIn}]]*/ false;
@@ -45,7 +107,18 @@
             
             // fetch availability for today (or selected date if already chosen)
             const date = document.getElementById('date').value;
-            if (date) fetchAndMarkAvailability(slot, date);
+            if (date) {
+                fetchAndMarkAvailability(slot, date);
+            } else {
+                // Set today's date and fetch availability
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = pad2(today.getMonth()+1);
+                const dd = pad2(today.getDate());
+                const todayStr = `${yyyy}-${mm}-${dd}`;
+                document.getElementById('date').value = todayStr;
+                fetchAndMarkAvailability(slot, todayStr);
+            }
         }
 
         function closeModal() {
@@ -103,24 +176,36 @@
                 const data = await res.json();
                 if(!data.ok) return;
                 const occupied = new Set(data.occupied);
+                
                 document.querySelectorAll('.time-chip').forEach(chip => {
                     const i = parseInt(chip.dataset.index,10);
                     if (occupied.has(i)){
-                        chip.classList.remove('btn-outline-primary', 'btn-primary');
-                        chip.classList.add('btn-danger');
+                        // Mark as occupied/busy
+                        chip.classList.remove('btn-outline-primary', 'btn-primary', 'selected');
+                        chip.classList.add('btn-danger', 'busy');
                         chip.disabled = true;
                         chip.textContent = '✕ ' + chip.dataset.start + ' - ' + chip.dataset.end;
+                        chip.title = 'Khung giờ này đã được đặt';
                     } else {
-                        chip.classList.remove('btn-danger');
+                        // Mark as available
+                        chip.classList.remove('btn-danger', 'busy', 'selected');
                         chip.classList.add('btn-outline-primary');
                         chip.disabled = false;
                         chip.textContent = chip.dataset.start + ' - ' + chip.dataset.end;
+                        chip.title = 'Khung giờ có thể đặt';
                     }
                 });
-            }catch(e){ /* ignore */ }
+            }catch(e){ 
+                console.error('Error fetching availability:', e);
+            }
         }
 
         function toggleChip(chip){
+            // Don't allow toggling if chip is disabled (occupied)
+            if (chip.disabled || chip.classList.contains('busy') || chip.classList.contains('btn-danger')) {
+                return;
+            }
+            
             const index = parseInt(chip.dataset.index, 10);
             if (chip.classList.contains('btn-primary')){
                 chip.classList.remove('btn-primary');

@@ -10,22 +10,22 @@
 <header th:replace="~{partials/navbar :: navbar}"></header>
 
 <main class="container">
-    <h1>Liên hệ</h1>
-    <div class="contact-info">
-        <p><strong>Địa chỉ sân:</strong> 01 Võ Văn Ngân, Thủ Đức, TP.HCM</p>
-        <p><strong>Hotline đặt sân:</strong> 0901 234 567</p>
-        <p><strong>Email:</strong> booking@utesoccer.example</p>
-        <p><strong>Giờ hỗ trợ:</strong> 08:00 – 22:00</p>
+    <h1 style="color:var(--text-primary); text-align:center; margin-bottom:24px">Liên hệ</h1>
+    <div class="contact-info" style="background:rgba(255,255,255,.95); backdrop-filter:blur(20px); border-radius:20px; padding:32px; margin:24px 0; box-shadow:0 20px 40px rgba(0,0,0,.15)">
+        <p style="color:var(--text-primary); font-weight:500"><strong>Địa chỉ sân:</strong> 01 Võ Văn Ngân, Thủ Đức, TP.HCM</p>
+        <p style="color:var(--text-primary); font-weight:500"><strong>Hotline đặt sân:</strong> 0901 234 567</p>
+        <p style="color:var(--text-primary); font-weight:500"><strong>Email:</strong> booking@utesoccer.example</p>
+        <p style="color:var(--text-primary); font-weight:500"><strong>Giờ hỗ trợ:</strong> 08:00 – 22:00</p>
     </div>
     <form class="contact-form" method="post" action="#" onsubmit="alert('Cảm ơn bạn đã gửi liên hệ!'); return false;">
-        <label>Họ và tên
-            <input type="text" name="name" required>
+        <label style="color:var(--text-primary)">Họ và tên
+            <input type="text" name="name" required style="color:var(--text-primary)">
         </label>
-        <label>Email
-            <input type="email" name="email" required>
+        <label style="color:var(--text-primary)">Email
+            <input type="email" name="email" required style="color:var(--text-primary)">
         </label>
-        <label>Nội dung
-            <textarea name="message" rows="5" required></textarea>
+        <label style="color:var(--text-primary)">Nội dung
+            <textarea name="message" rows="5" required style="color:var(--text-primary)"></textarea>
         </label>
         <button type="submit" class="btn-primary">Gửi liên hệ</button>
     </form>

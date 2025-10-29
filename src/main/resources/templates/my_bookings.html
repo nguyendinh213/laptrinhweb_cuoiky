@@ -10,7 +10,7 @@
 <header th:replace="~{partials/navbar :: navbar}"></header>
 
 <main class="container">
-    <h1>Đặt chỗ của tôi</h1>
+    <h1 style="color:var(--text-primary); text-align:center; margin-bottom:24px">Đặt chỗ của tôi</h1>
     <div class="table-wrap">
         <table class="table">
             <thead>
@@ -33,7 +33,7 @@
                 <td th:text="${b.status}">PENDING</td>
             </tr>
             <tr th:if="${#lists.isEmpty(bookings)}">
-                <td colspan="6" style="text-align:center; color:var(--muted)">Chưa có đặt chỗ</td>
+                <td colspan="6" style="text-align:center; color:var(--text-secondary); font-weight:500">Chưa có đặt chỗ</td>
             </tr>
             </tbody>
         </table>

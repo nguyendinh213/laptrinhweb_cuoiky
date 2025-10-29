@@ -10,22 +10,22 @@
 <header th:replace="~{partials/navbar :: navbar}"></header>
 
 <main class="container" style="max-width:720px; margin-top:16px">
-    <h1>Chi tiết đặt chỗ</h1>
+    <h1 style="color:var(--text-primary); text-align:center; margin-bottom:24px">Chi tiết đặt chỗ</h1>
     <p th:if="${error}" class="alert" th:text="${error}"></p>
     <div th:if="${b}">
         <div class="table-wrap">
             <table class="table">
                 <tbody>
-                <tr><th>Mã thanh toán</th><td th:text="${b.paymentCode}">code</td></tr>
-                <tr><th>Trạng thái</th><td th:text="${b.status}">CONFIRMED</td></tr>
-                <tr><th>Sân</th><td th:text="${b.slot}">1</td></tr>
-                <tr><th>Ngày</th><td th:text="${b.date}">2025-01-01</td></tr>
-                <tr><th>Giờ</th><td><span th:text="${b.startTime}">17:00</span> - <span th:text="${b.endTime}">18:00</span></td></tr>
-                <tr><th>Họ tên</th><td th:text="${b.name}">Nguyen Van A</td></tr>
-                <tr><th>SĐT</th><td th:text="${b.phone}">0900000000</td></tr>
-                <tr><th>Tài khoản</th><td th:text="${b.username}">user</td></tr>
-                <tr><th>Số tiền</th><td th:text="${#numbers.formatInteger(b.amount, 3, 'POINT') + ' VND'}">100,000 VND</td></tr>
-                <tr><th>Thanh toán lúc</th><td th:text="${#temporals.format(b.paidAt, 'dd/MM/yyyy HH:mm')}">...</td></tr>
+                <tr><th style="color:var(--text-primary)">Mã thanh toán</th><td th:text="${b.paymentCode}" style="color:var(--text-primary)">code</td></tr>
+                <tr><th style="color:var(--text-primary)">Trạng thái</th><td th:text="${b.status}" style="color:var(--text-primary)">CONFIRMED</td></tr>
+                <tr><th style="color:var(--text-primary)">Sân</th><td th:text="${b.slot}" style="color:var(--text-primary)">1</td></tr>
+                <tr><th style="color:var(--text-primary)">Ngày</th><td th:text="${b.date}" style="color:var(--text-primary)">2025-01-01</td></tr>
+                <tr><th style="color:var(--text-primary)">Giờ</th><td style="color:var(--text-primary)"><span th:text="${b.startTime}">17:00</span> - <span th:text="${b.endTime}">18:00</span></td></tr>
+                <tr><th style="color:var(--text-primary)">Họ tên</th><td th:text="${b.name}" style="color:var(--text-primary)">Nguyen Van A</td></tr>
+                <tr><th style="color:var(--text-primary)">SĐT</th><td th:text="${b.phone}" style="color:var(--text-primary)">0900000000</td></tr>
+                <tr><th style="color:var(--text-primary)">Tài khoản</th><td th:text="${b.username}" style="color:var(--text-primary)">user</td></tr>
+                <tr><th style="color:var(--text-primary)">Số tiền</th><td th:text="${#numbers.formatInteger(b.amount, 3, 'POINT') + ' VND'}" style="color:var(--text-primary)">100,000 VND</td></tr>
+                <tr><th style="color:var(--text-primary)">Thanh toán lúc</th><td th:text="${#temporals.format(b.paidAt, 'dd/MM/yyyy HH:mm')}" style="color:var(--text-primary)">...</td></tr>
                 </tbody>
             </table>
         </div>

@@ -32,6 +32,9 @@ public class AppUser {
     @Column(length = 20)
     private String phone;
 
+    @Column(name = "last_name_change")
+    private java.time.LocalDateTime lastNameChange;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -55,6 +58,9 @@ public class AppUser {
 
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+
+    public java.time.LocalDateTime getLastNameChange() { return lastNameChange; }
+    public void setLastNameChange(java.time.LocalDateTime lastNameChange) { this.lastNameChange = lastNameChange; }
 }
 
 

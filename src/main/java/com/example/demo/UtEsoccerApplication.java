@@ -18,7 +18,7 @@ public class UtEsoccerApplication {
     @Bean
     CommandLineRunner seedAdmin(AppUserRepository repo, PasswordEncoder encoder){
         return args -> {
-            if (repo.findByUsername("admin") == null){
+            if (repo.findByUsername("admin").isEmpty()){
                 AppUser admin = new AppUser();
                 admin.setUsername("admin");
                 admin.setPasswordHash(encoder.encode("admin123"));
@@ -28,7 +28,7 @@ public class UtEsoccerApplication {
                 admin.setPhone("0900000000");
                 repo.save(admin);
             }
-            if (repo.findByUsername("user") == null){
+            if (repo.findByUsername("user").isEmpty()){
                 AppUser user = new AppUser();
                 user.setUsername("user");
                 user.setPasswordHash(encoder.encode("user123"));

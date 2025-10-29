@@ -10,11 +10,11 @@
 <header th:replace="~{partials/navbar :: navbar}"></header>
 
 <main class="container">
-    <h1>Quản trị - Danh sách đặt chỗ</h1>
+    <h1 style="color:var(--text-primary); text-align:center; margin-bottom:24px">Quản trị - Danh sách đặt chỗ</h1>
 
     <form method="get" th:action="@{/admin}" class="form-grid" style="grid-template-columns:repeat(2,1fr)">
-        <label>Ngày
-            <input type="date" name="date" th:value="${#temporals.format(date, 'yyyy-MM-dd')}">
+        <label style="color:var(--text-primary)">Ngày
+            <input type="date" name="date" th:value="${#temporals.format(date, 'yyyy-MM-dd')}" style="color:var(--text-primary)">
         </label>
         <div style="align-self:end; display:flex; gap:10px; justify-content:flex-end">
             <button class="btn" type="submit">Lọc</button>
@@ -46,7 +46,7 @@
                 <td th:text="${b.phone}">0900000000</td>
             </tr>
             <tr th:if="${#lists.isEmpty(bookings)}">
-                <td colspan="7" style="text-align:center; color:var(--muted)">Không có dữ liệu</td>
+                <td colspan="7" style="text-align:center; color:var(--text-secondary); font-weight:500">Không có dữ liệu</td>
             </tr>
             </tbody>
         </table>
