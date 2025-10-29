@@ -141,7 +141,7 @@ cd UTEsoccer
 ```sql
 CREATE DATABASE utesoccer;
 -- Tạo user với password: dinh2103
-CREATE USER 'root'@'localhost' IDENTIFIED BY 'dinh2103';
+CREATE USER 'root'@'localhost' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON utesoccer.* TO 'root'@'localhost';
 ```
 
@@ -149,7 +149,7 @@ GRANT ALL PRIVILEGES ON utesoccer.* TO 'root'@'localhost';
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/utesoccer
 spring.datasource.username=root
-spring.datasource.password=dinh2103
+spring.datasource.password=password
 spring.jpa.hibernate.ddl-auto=update
 ```
 
