@@ -7,6 +7,7 @@ UTE Soccer là một hệ thống web đặt sân bóng mini theo giờ với 6 
 ## 🎯 Tính năng chính
 
 ### 👥 Đối với Guest (Khách)
+- Đăng nhập/đăng ký tài khoản
 - Xem thông tin 6 sân bóng mini
 - Đặt chỗ theo giờ với thông tin cá nhân
 - Xem khung giờ đã đặt (màu đỏ, không chọn được)
@@ -15,7 +16,6 @@ UTE Soccer là một hệ thống web đặt sân bóng mini theo giờ với 6 
 
 ### 🔐 Đối với User (Người dùng đã đăng ký)
 - Tất cả tính năng của Guest
-- Đăng nhập/đăng ký tài khoản
 - Thông tin cá nhân được tự động điền khi đặt chỗ
 - Xem lịch sử đặt chỗ của mình
 - Quản lý profile cá nhân
